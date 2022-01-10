@@ -8,9 +8,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in $store.state.users" v-bind:key="user.id">
+        <tr v-for="user in $store.state.users.list" v-bind:key="user.id">
           <td>{{ user.id }}</td>
-          <td>{{ user.username }}</td>
+          <!-- 
+            属性に変数を展開したい場合はv-bindを利用する
+            https://jp.vuejs.org/v2/guide/syntax.html#%E5%B1%9E%E6%80%A7
+          -->
+          <td><nuxt-link v-bind:to="`/users/${user.id}`">{{ user.username }}</nuxt-link></td>
         </tr>
       </tbody>
     </template>
@@ -18,14 +22,32 @@
 </template>
 
 <script>
+/**
+ * プロパティ一覧
+ * https://nuxtjs.org/docs/directory-structure/pages/#properties
+ */
 export default {
-  asyncData(context) {
-    return {}
+  data() {
+    return {
+      "foo": "bar"
+    }
   },
-  async fetch() {
-    // await this.$store.dispatch("users/getAll")
-    await this.$store.dispatch("getUsersAll")
-    console.log("fetch", this.$store.state.users)
+  /**
+   * 取得してきたデータをdata変数として扱いたい時に利用する
+   *  asyncDataはPromiseを返し、promiseの中でdata()オプションと同様にオブジェクトを返す
+   * サーバー側で実行されるので、内部で this を利用することはできない。引数のcontextを利用する
+   * https://negalog.com/nuxt-js-fetch-data/
+   */
+  async asyncData(context) {
+    console.log(context)
+    
+  },
+  /**
+   * 取得してきたデータをdata変数として扱いたい時
+   * https://negalog.com/nuxt-js-fetch-data/
+   */
+  async fetch(context) {
+    await context.store.dispatch("users/getAll")
   }
 }
 </script>
