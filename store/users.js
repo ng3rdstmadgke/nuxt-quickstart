@@ -13,8 +13,8 @@ export const mutations = {
 }
 
 export const actions = {
-  async getAll(context) {
-    await this.$axios.get("//127.0.0.1:8000/api/v1/open/users/")
+  async getUsers(context) {
+    await context.$axios.get("//127.0.0.1:8000/api/v1/open/users/")
       .then((res) => {
         if (res.status == 200) {
           // 同storeの mutations の setList を呼び出して、レスポンスをstateに保存
@@ -36,4 +36,9 @@ export const actions = {
         console.log(e)
       })
   },
+  async createUser(context, data) {
+    return await this.$axios.post("//127.0.0.1:8000/api/v1/open/users/", data)
+      .then((res) => { return res })
+      .catch((e) => { console.log(e) })
+  }
 }

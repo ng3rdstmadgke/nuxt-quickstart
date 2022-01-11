@@ -5,7 +5,7 @@
     <v-text-field
       v-model="username"
       :error-messages="usernameErrors"
-      :counter="10"
+      :counter="30"
       label="Username"
       required
       @input="$v.username.$touch()"
@@ -16,6 +16,7 @@
       :error-messages="passwordErrors"
       label="Password"
       required
+      type="password"
       @input="$v.password.$touch()"
       @blur="$v.password.$touch()"
     ></v-text-field>
@@ -25,16 +26,21 @@
 </template>
 
 <script>
-  import { userVuelidate } from 'vuelidate/core'
-  // validators: https://vuelidate-next.netlify.app/validators.html
+  // vuelidateドキュメント: https://vuelidate.js.org/
+  import { validationMixin } from 'vuelidate'
   import { required, maxLength, minLength } from 'vuelidate/lib/validators'
   /**
-   * バリデーションステート: https://vuelidate-next.netlify.app/api/state.html
+   * バリデータ: https://vuelidate.js.org/#validators
+   *   required: 必須入力
+   *   minLength, maxLength: 最小文字数・最大文字数
+   *   minValue, maxValue: 最小値・最大値
+   * 
+   * バリデーションステート: https://vuelidate.js.org/#sub-v-values
    *   $dirty:
    *     対象のフィールドが少なくとも一回はユーザーに変更されたかどうかをあらわすフラグ。
    *     ユーザーに対してエラーメッセージ等を表示するかどうかのフラグとして利用される。
-   * 
-   * バリデーションメソッド: https://vuelidate-next.netlify.app/api/methods.html
+   *
+   * バリデーションメソッド: https://vuelidate.js.org/#sub-v-methods
    *   $touch:
    *     対象の $dirty ステートをtrueにする
    *   $reset:
@@ -42,16 +48,10 @@
    *   $validate:
    *      すべてのプロパティを $dirty = true にし、すべてのバリデーションを行う。
    *       バリデーション完了後 Promise<Boolean> を返却する
-   * 
    */
 
-
   export default {
-    setup() {
-      return {
-        $v: userVuelidate()
-      }
-    },
+    mixins: [validationMixin],
 
     data: () => ({
       username: '',
@@ -83,17 +83,24 @@
     },
 
     methods: {
-      submit () {
-        this.$v.$validate().then(
-          (result) => {
-            console.log("success!!!")
+      async submit () {
+        this.$v.$touch()
+        if (this.$v.$invalid) {
+          console.log("error...")
+        } else {
+          let data = {
+            username: this.username,
+            password: this.password
           }
-        ).catch(
-          (e) => {
-            console.log(e)
+          let response = await this.$store.dispatch("users/createUser", data);
+          if (response.status == 200) {
+            console.log(`success: ${response.status}`)
+            this.$router.push({path: "/users"})
+          } else {
+            // TODO: エラーメッセージを出す
+            console.log(`error: ${response.status}`)
           }
-        )
-        console.log("success!!!")
+        }
       },
       clear () {
         this.$v.$reset()
