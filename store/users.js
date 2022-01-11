@@ -14,9 +14,10 @@ export const mutations = {
 
 export const actions = {
   async getAll(context) {
-    await this.$axios.get("//localhost:8000/api/v1/open/users/")
+    await this.$axios.get("//127.0.0.1:8000/api/v1/open/users/")
       .then((res) => {
         if (res.status == 200) {
+          // 同storeの mutations の setList を呼び出して、レスポンスをstateに保存
           context.commit("setList", res.data)
         }
       })
@@ -25,7 +26,7 @@ export const actions = {
       })
   },
   async getUser(context, id) {
-    await this.$axios.get(`//localhost:8000/api/v1/open/users/${id}`)
+    await this.$axios.get(`//127.0.0.1:8000/api/v1/open/users/${id}`)
       .then((res) => {
         if (res.status == 200) {
           context.commit("setUser", res.data)

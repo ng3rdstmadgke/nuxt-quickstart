@@ -8,7 +8,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in $store.state.users.list" v-bind:key="user.id">
+        <tr v-for="user in $data.response.users" v-bind:key="user.id">
           <td>{{ user.id }}</td>
           <!-- 
             属性に変数を展開したい場合はv-bindを利用する
@@ -29,25 +29,27 @@
 export default {
   data() {
     return {
-      "foo": "bar"
+      response: {}
     }
   },
   /**
-   * 取得してきたデータをdata変数として扱いたい時に利用する
-   *  asyncDataはPromiseを返し、promiseの中でdata()オプションと同様にオブジェクトを返す
-   * サーバー側で実行されるので、内部で this を利用することはできない。引数のcontextを利用する
-   * https://negalog.com/nuxt-js-fetch-data/
+   * dataに非同期なデータを保存するためのプロパティ
+   * 
+   * asyncDataは返却された値(オブジェクト)をコンポーネントのdataにマージされ、
+   * asyncDataフックから返却されるpromiseはルートの繊維の間に解決される。
+   * asyncDataは this(コンポーネントインスタンス) にアクセスできないため、引数の context を利用する
+   * https://nuxtjs.org/ja/docs/features/data-fetching/#async-data
    */
   async asyncData(context) {
-    console.log(context)
-    
+    let response = await context.$axios.get("http://127.0.0.1:8000/api/v1/open/users/")
+      .then((res) => {
+        if (res.status == 200) {
+          return {users: res.data}
+        } else {
+          return {}
+        }
+      })
+    return {response: response}
   },
-  /**
-   * 取得してきたデータをdata変数として扱いたい時
-   * https://negalog.com/nuxt-js-fetch-data/
-   */
-  async fetch(context) {
-    await context.store.dispatch("users/getAll")
-  }
 }
 </script>
