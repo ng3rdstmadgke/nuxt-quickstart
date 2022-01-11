@@ -1,4 +1,5 @@
 <template>
+<div>
   <v-simple-table>
     <template v-slot:default>
       <thead>
@@ -19,6 +20,16 @@
       </tbody>
     </template>
   </v-simple-table>
+  <div class="mt-3">
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-btn block color="success" elevation="2" text to="/users/create">Create</v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
+</div>
 </template>
 
 <script>
