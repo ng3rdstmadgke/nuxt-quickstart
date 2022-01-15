@@ -6,6 +6,7 @@
         <tr>
           <th class="text-left">Id</th>
           <th class="text-left">Name</th>
+          <th class="text-left">更新</th>
         </tr>
       </thead>
       <tbody>
@@ -16,6 +17,7 @@
             https://jp.vuejs.org/v2/guide/syntax.html#%E5%B1%9E%E6%80%A7
           -->
           <td><nuxt-link v-bind:to="`/users/${user.id}`">{{ user.username }}</nuxt-link></td>
+          <td><v-btn v-bind:to="`/users/${user.id}/edit`">edit</v-btn></td>
         </tr>
       </tbody>
     </template>
@@ -24,7 +26,7 @@
     <v-container>
       <v-row>
         <v-col>
-          <v-btn block color="success" elevation="2" text to="/users/create">Create</v-btn>
+          <v-btn block color="primary" to="/users/create">Create</v-btn>
         </v-col>
       </v-row>
     </v-container>
