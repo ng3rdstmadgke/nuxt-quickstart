@@ -1,4 +1,8 @@
 <template>
+  <!--
+    v-modelのdialogがtrueなら表示、falseなら非表示
+    https://vuetifyjs.com/ja/components/dialogs/
+  -->
   <v-dialog v-model="dialog" persistent max-width="400px">
     <v-card>
       <v-card-title>
@@ -18,6 +22,8 @@
 
 <script>
 export default {
+  // propsは親コンポーネントから子コンポーネントへ引き渡す情報
+  // https://ktamido.esa.io/posts/398#%E2%96%A0%20%E8%A6%AA%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%81%8B%E3%82%89%E5%AD%90%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%81%B8%E3%81%AE%E4%BC%9D%E9%81%94%20(%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3)
   props: {
     title: String,
     message: String,
@@ -37,6 +43,8 @@ export default {
     },
     confirm() {
       this.dialog = false
+      // emit(event[, args]) はカスタムイベントを発生される。(ここではconfirmカスタムイベントを発生させる)
+      // https://ktamido.esa.io/posts/398#%E2%97%8E%20%E4%BE%8B
       this.$emit('confirm')
     },
   },

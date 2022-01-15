@@ -41,6 +41,15 @@
     </v-container>
   </div>
 
+  <!--
+    ConfirmDialogコンポーネントの呼び出し
+    - ref="..."
+      this.$refs.{...} で要素を参照できる
+    - v-on:confirm="..."
+      confirmはConfirmDialogコンポーネントのconfirm()メソッド内のemitで発生させるイベント
+    - 属性
+      propに割り当てる値を属性として定義
+  -->
   <ConfirmDialog
     ref="confirm"
     title="Delete User"
@@ -63,11 +72,13 @@ export default {
     }
   },
   components: {
-    ConfirmDialog
+    ConfirmDialog: ConfirmDialog
   },
   methods: {
     openDeleteConfirmDialog(id) {
       // ConfirmDialogタグのref属性のconfirmを指定している
+      // https://zenn.dev/kokota/articles/247d4f61590dab
+      // ConfirmDialogコンポーネントのopen()を呼び出すことでdialogを表示する
       this.$refs.confirm.open()
     },
     async confirmDeletion() {
