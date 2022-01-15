@@ -78,7 +78,7 @@ export default {
     openDeleteConfirmDialog(id) {
       // ConfirmDialogタグのref属性のconfirmを指定している
       // https://zenn.dev/kokota/articles/247d4f61590dab
-      // ConfirmDialogコンポーネントのopen()を呼び出すことでdialogを表示する
+      // ConfirmDialogコンポーネントのopen()を呼びu出すことでdialogを表示する
       this.$refs.confirm.open()
     },
     async confirmDeletion() {
