@@ -41,12 +41,15 @@ import Common from '@/plugins/common'
  * https://nuxtjs.org/docs/directory-structure/pages/#properties
  */
 export default {
+  middleware: ['auth'], // middleware/auth.js
+
   data() {
     return {
     }
   },
   /**
    * dataに非同期なデータを保存するためのプロパティ
+   * サーバーサイドの処理
    * 
    * asyncDataは返却された値(オブジェクト)をコンポーネントのdataにマージされ、
    * asyncDataフックから返却されるpromiseはルートの繊維の間に解決される。
@@ -54,7 +57,7 @@ export default {
    * https://nuxtjs.org/ja/docs/features/data-fetching/#async-data
    */
   async asyncData(context) {
-    return context.$axios.get("http://127.0.0.1:8000/api/v1/open/users/")
+    return context.$axios.get("http://127.0.0.1:8000/api/v1/users/")
       .then(res => {
         return {users: res.data}
       })

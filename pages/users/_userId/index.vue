@@ -68,16 +68,20 @@ import Alert from '~/components/Alert'
 import Common from '@/plugins/common'
 
 export default {
+  middleware: ['auth'], // middleware/auth.js
+
   data() {
     return {
       dialogMessage: "本当に削除しますか",
       alertMessage: "",
     }
   },
+
   components: {
     ConfirmDialog: ConfirmDialog,
     Alert: Alert,
   },
+
   methods: {
     // アイテム削除時のダイアログ表示
     openDeleteConfirmDialog(id) {
@@ -87,7 +91,7 @@ export default {
       this.$refs.confirm.open()
     },
     async confirmDeletion() {
-      this.$axios.delete(`http://127.0.0.1:8000/api/v1/open/users/${this.$route.params.userId}`)
+      this.$axios.delete(`http://127.0.0.1:8000/api/v1/users/${this.$route.params.userId}`)
         .then(_res => {
           this.$router.push({path: "/users"})
         })
@@ -97,11 +101,13 @@ export default {
         })
     }
   },
+
+  // サーバーサイドの処理
   async asyncData(context) {
     // contestのメンバ: https://nuxtjs.org/docs/internals-glossary/context/
     //                  https://develop365.gitlab.io/nuxtjs-2.8.X-doc/ja/api/context/
     //   contextからaxiosを利用する場合は context.$axios.get(...)
-    return context.$axios.get(`http://127.0.0.1:8000/api/v1/open/users/${context.params.userId}`)
+    return context.$axios.get(`http://127.0.0.1:8000/api/v1/users/${context.params.userId}`)
       .then(res => {
         return {user: res.data}
       })

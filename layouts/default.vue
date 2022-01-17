@@ -8,6 +8,7 @@
       app
     >
       <v-list>
+
         <v-list-item
           v-for="(item, i) in items"
           :key="i"
@@ -20,6 +21,15 @@
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="item.title" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item @click="logout">
+          <v-list-item-action>
+            <v-icon>mdi-logout</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Logout</v-list-item-title>
+
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -89,6 +99,8 @@
 </template>
 
 <script>
+import Auth from "@/plugins/auth.js"
+
 export default {
   data () {
     return {
@@ -102,6 +114,11 @@ export default {
           to: '/'
         },
         {
+          icon: 'mdi-login',
+          title: 'Login',
+          to: '/login'
+        },
+        {
           icon: 'mdi-home',
           title: 'Users',
           to: '/users/'
@@ -112,6 +129,14 @@ export default {
       rightDrawer: false,
       title: 'Vuetify.js'
     }
+  },
+
+  methods: {
+    logout() {
+      Auth.logout(this.$cookies)
+      this.$router.push({path: "/"})
+    }
   }
+  
 }
 </script>

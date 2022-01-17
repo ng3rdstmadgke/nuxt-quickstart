@@ -34,6 +34,7 @@ import { validationMixin } from 'vuelidate'
 import { required, maxLength, minLength } from 'vuelidate/lib/validators'
 
 import Alert from '~/components/Alert'
+import Common from '@/plugins/common'
 
 /**
  * バリデータ: https://vuelidate.js.org/#validators
@@ -58,6 +59,7 @@ import Alert from '~/components/Alert'
 
 export default {
   mixins: [validationMixin],
+  middleware: ['auth'], // middleware/auth.js
 
   data: () => ({
     username: '',
@@ -103,18 +105,17 @@ export default {
           username: this.username,
           password: this.password
         }
-        this.$axios.post("//127.0.0.1:8000/api/v1/open/users/", data)
+        this.$axios.post("//127.0.0.1:8000/api/v1/users/", data)
           .then(res => {
             this.$router.push({path: "/users"})
           })
           .catch(e => {
-            console.log(e.response)
             this.$data.alertMessage = Common.getAlertMessage(e)
             this.$refs.alert.open()
           })
       }
     },
-    clear () {
+    clear() {
       this.$v.$reset()
       this.username = ''
       this.password = ''

@@ -1,5 +1,6 @@
 /**
  * 共通関数を定義
+ * https://nuxtjs.org/ja/docs/directory-structure/plugins
  * 
  * プラグインの登録
  * ```nuxt.config.js
@@ -29,18 +30,6 @@ export default {
    * @param {*} e 
    */
   redirectErrorPage(context, e) {
-    let log = {
-      status: e.response.status,
-      statusText: e.response.statusText,
-      url: e.response.config.url,
-      request_header: e.response.config.headers,
-      request_data: e.response.config.data,
-      response_header: e.response.headers,
-      response_data: e.response.data,
-    }
-    // console.log(e.response)
-    console.error(log)
-    console.error(e)
     // layout/error.vueへの遷移: https://nuxtjs.org/ja/docs/internals-glossary/context#error
     context.error({
       statusCode: e.response.status,

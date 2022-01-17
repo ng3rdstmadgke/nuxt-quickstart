@@ -1,12 +1,12 @@
 <template>
   <v-app dark>
-    <h1>
+    <div class="text-h1">
       <!--
         statusCode, messageパラメータは必須
         https://nuxtjs.org/ja/docs/internals-glossary/context#error
       -->
       {{ $props.error.statusCode }} {{ $props.error.message }}
-    </h1>
+    </div>
   </v-app>
 </template>
 
@@ -32,9 +32,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-h1 {
-  font-size: 20px;
-}
-</style>
