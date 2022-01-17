@@ -1,14 +1,12 @@
 <template>
   <v-app dark>
-    <h1 v-if="error.statusCode === 404">
-      {{ pageNotFound }}
-    </h1>
-    <h1 v-else>
-      {{ otherError }}
-    </h1>
-    <NuxtLink to="/">
-      Home page
-    </NuxtLink>
+    <div class="text-h1">
+      <!--
+        statusCode, messageパラメータは必須
+        https://nuxtjs.org/ja/docs/internals-glossary/context#error
+      -->
+      {{ $props.error.statusCode }} {{ $props.error.message }}
+    </div>
   </v-app>
 </template>
 
@@ -23,22 +21,14 @@ export default {
   },
   data () {
     return {
-      pageNotFound: '404 Not Found',
-      otherError: 'An error occurred'
     }
   },
+  // headタグの要素を定義
+  // https://nuxtjs.org/ja/docs/components-glossary/head/
   head () {
-    const title =
-      this.error.statusCode === 404 ? this.pageNotFound : this.otherError
     return {
-      title
+      title: `${this.error.statusCode} ${this.error.message}`
     }
   }
 }
 </script>
-
-<style scoped>
-h1 {
-  font-size: 20px;
-}
-</style>

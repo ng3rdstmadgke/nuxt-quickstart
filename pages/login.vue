@@ -4,7 +4,7 @@
   <form>
    <!-- $touch: $dirtyフラグを trueにする -->
     <v-text-field
-      v-model="$data.username"
+      v-model="username"
       :error-messages="usernameErrors"
       :counter="30"
       label="Username"
@@ -26,18 +26,21 @@
   </form>
 </div>
 </template>
+
 <script>
 import { validationMixin } from 'vuelidate'
-import { required, maxLength, minLength } from 'vuelidate/lib/validators'
+import { required } from 'vuelidate/lib/validators'
+
 import Alert from '~/components/Alert'
 import Common from '@/plugins/common'
+import Auth from "@/plugins/auth.js"
 
 export default {
   mixins: [validationMixin],
-  middleware: ['auth'], // middleware/auth.js
 
   data() {
     return {
+      username: "",
       password: "",
       alertMessage: "",
     }
@@ -48,8 +51,8 @@ export default {
   },
 
   validations: {
-    username: { required, maxLength: maxLength(30) },
-    password: { required, maxLength: maxLength(30), minLength: minLength(8) },
+    username: { required },
+    password: { required },
   },
 
   computed: {
@@ -57,50 +60,33 @@ export default {
       const errors = []
       // ユーザーに編集されていなければエラーメッセージは返さない
       if (!this.$v.username.$dirty) return errors
-      !this.$v.username.maxLength && errors.push('Usernameは30文字以内で入力してください')
       !this.$v.username.required && errors.push('Usernameを入力してください')
       return errors
     },
     passwordErrors () {
       const errors = []
       if (!this.$v.password.$dirty) return errors
-      !this.$v.password.maxLength && errors.push('Passwordは30文字以内で入力してください')
-      !this.$v.password.minLength && errors.push('Passwordは8文字以上で入力してください')
       !this.$v.password.required && errors.push('Passwordを入力してください')
       return errors
     },
   },
 
-  // サーバーサイドの処理
-  async asyncData(context) {
-    // contestのメンバ: https://nuxtjs.org/docs/internals-glossary/context/
-    //                  https://develop365.gitlab.io/nuxtjs-2.8.X-doc/ja/api/context/
-
-    // こんな感じでresponseを同期的に受け取ることもできる
-    // let response = await context.$axios.get(`http://127.0.0.1:8000/api/v1/open/users/${context.params.userId}`)
-
-    return context.$axios.get(`http://127.0.0.1:8000/api/v1/users/${context.params.userId}`)
-      .then(res => {
-        return {username: res.data.username}
-      })
-      .catch(e => {
-        Common.redirectErrorPage(context, e)
-      })
-  },
-
   methods: {
-    async submit () {
+    submit() {
       this.$v.$touch()
       if (!this.$v.$invalid) {
-        let data = {
-          username: this.username,
-          password: this.password,
-        }
-        // 現在のURLを取得する: https://qiita.com/TK-C/items/caab322156872d546331
-        // this.$route
-        this.$axios.put(`//127.0.0.1:8000/api/v1/users/${this.$route.params.userId}`, data)
-          .then(_res => {
-            this.$router.push({path: "/users"})
+        let form = new FormData()
+        form.append("username", this.$data.username)
+        form.append("password", this.$data.password)
+        this.$axios.post("//127.0.0.1:8000/api/v1/token", form)
+          .then(res => {
+            // console.log(res)
+            let token = res.data.access_token
+            Auth.setAccessToken(this.$cookies, token)
+            // console.log(this.$router)
+            // vue router: https://router.vuejs.org/guide/essentials/navigation.html
+            this.$router.back()
+            //this.$cookies.set("__auth_token", token)
           })
           .catch(e => {
             this.$data.alertMessage = Common.getAlertMessage(e)
@@ -108,10 +94,11 @@ export default {
           })
       }
     },
-    clear () {
+    clear() {
       this.$v.$reset()
       this.username = ''
+      this.password = ''
     },
-  },
+  }
 }
 </script>

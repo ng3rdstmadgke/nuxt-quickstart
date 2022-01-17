@@ -1,5 +1,7 @@
 
 <template>
+<div>
+  <Alert ref="alert" type="error" :message="$data.alertMessage"></Alert>
   <form>
    <!-- $touch: $dirtyフラグを trueにする -->
     <v-text-field
@@ -23,90 +25,101 @@
     <v-btn class="mr-4" @click="submit" >submit</v-btn>
     <v-btn @click="clear">clear</v-btn>
   </form>
+</div>
 </template>
 
 <script>
-  // vuelidateドキュメント: https://vuelidate.js.org/
-  import { validationMixin } from 'vuelidate'
-  import { required, maxLength, minLength } from 'vuelidate/lib/validators'
-  /**
-   * バリデータ: https://vuelidate.js.org/#validators
-   *   required: 必須入力
-   *   minLength, maxLength: 最小文字数・最大文字数
-   *   minValue, maxValue: 最小値・最大値
-   * 
-   * バリデーションステート: https://vuelidate.js.org/#sub-v-values
-   *   $dirty:
-   *     対象のフィールドが少なくとも一回はユーザーに変更されたかどうかをあらわすフラグ。
-   *     ユーザーに対してエラーメッセージ等を表示するかどうかのフラグとして利用される。
-   *
-   * バリデーションメソッド: https://vuelidate.js.org/#sub-v-methods
-   *   $touch:
-   *     対象の $dirty ステートをtrueにする
-   *   $reset:
-   *     対象の $dirty ステートをリセットする
-   *   $validate:
-   *      すべてのプロパティを $dirty = true にし、すべてのバリデーションを行う。
-   *       バリデーション完了後 Promise<Boolean> を返却する
-   */
+// vuelidateドキュメント: https://vuelidate.js.org/
+import { validationMixin } from 'vuelidate'
+import { required, maxLength, minLength } from 'vuelidate/lib/validators'
 
-  export default {
-    mixins: [validationMixin],
+import Alert from '~/components/Alert'
+import Common from '@/plugins/common'
 
-    data: () => ({
-      username: '',
-      password: '',
-    }),
+/**
+ * バリデータ: https://vuelidate.js.org/#validators
+ *   required: 必須入力
+ *   minLength, maxLength: 最小文字数・最大文字数
+ *   minValue, maxValue: 最小値・最大値
+ * 
+ * バリデーションステート: https://vuelidate.js.org/#sub-v-values
+ *   $dirty:
+ *     対象のフィールドが少なくとも一回はユーザーに変更されたかどうかをあらわすフラグ。
+ *     ユーザーに対してエラーメッセージ等を表示するかどうかのフラグとして利用される。
+ *
+ * バリデーションメソッド: https://vuelidate.js.org/#sub-v-methods
+ *   $touch:
+ *     対象の $dirty ステートをtrueにする
+ *   $reset:
+ *     対象の $dirty ステートをリセットする
+ *   $validate:
+ *      すべてのプロパティを $dirty = true にし、すべてのバリデーションを行う。
+ *       バリデーション完了後 Promise<Boolean> を返却する
+ */
 
-    validations: {
-      username: { required, maxLength: maxLength(30) },
-      password: { required, maxLength: maxLength(30), minLength: minLength(8) },
+export default {
+  mixins: [validationMixin],
+  middleware: ['auth'], // middleware/auth.js
+
+  data: () => ({
+    username: '',
+    password: '',
+    alertMessage: "",
+  }),
+
+  components: {
+    Alert: Alert
+  },
+
+  validations: {
+    username: { required, maxLength: maxLength(30) },
+    password: { required, maxLength: maxLength(30), minLength: minLength(8) },
+  },
+
+  computed: {
+    usernameErrors () {
+      const errors = []
+      // ユーザーに編集されていなければエラーメッセージは返さない
+      if (!this.$v.username.$dirty) return errors
+      !this.$v.username.maxLength && errors.push('Usernameは30文字以内で入力してください')
+      !this.$v.username.required && errors.push('Usernameを入力してください')
+      return errors
     },
-
-    computed: {
-      usernameErrors () {
-        const errors = []
-        // ユーザーに編集されていなければエラーメッセージは返さない
-        if (!this.$v.username.$dirty) return errors
-        !this.$v.username.maxLength && errors.push('Usernameは30文字以内で入力してください')
-        !this.$v.username.required && errors.push('Usernameを入力してください')
-        return errors
-      },
-      passwordErrors () {
-        const errors = []
-        if (!this.$v.password.$dirty) return errors
-        !this.$v.password.maxLength && errors.push('Passwordは30文字以内で入力してください')
-        !this.$v.password.minLength && errors.push('Passwordは8文字以上で入力してください')
-        !this.$v.password.required && errors.push('Passwordを入力してください')
-        return errors
-      },
+    passwordErrors () {
+      const errors = []
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.maxLength && errors.push('Passwordは30文字以内で入力してください')
+      !this.$v.password.minLength && errors.push('Passwordは8文字以上で入力してください')
+      !this.$v.password.required && errors.push('Passwordを入力してください')
+      return errors
     },
+  },
 
-    methods: {
-      async submit () {
-        this.$v.$touch()
-        if (this.$v.$invalid) {
-          console.log("error...")
-        } else {
-          let data = {
-            username: this.username,
-            password: this.password
-          }
-          let response = await this.$store.dispatch("users/createUser", data);
-          if (response.status == 200) {
-            console.log(`success: ${response.status}`)
-            this.$router.push({path: "/users"})
-          } else {
-            // TODO: エラーメッセージを出す
-            console.log(`error: ${response.status}`)
-          }
+  methods: {
+    async submit () {
+      this.$v.$touch()
+      if (this.$v.$invalid) {
+        console.log("error...")
+      } else {
+        let data = {
+          username: this.username,
+          password: this.password
         }
-      },
-      clear () {
-        this.$v.$reset()
-        this.username = ''
-        this.password = ''
-      },
+        this.$axios.post("//127.0.0.1:8000/api/v1/users/", data)
+          .then(res => {
+            this.$router.push({path: "/users"})
+          })
+          .catch(e => {
+            this.$data.alertMessage = Common.getAlertMessage(e)
+            this.$refs.alert.open()
+          })
+      }
     },
-  }
+    clear() {
+      this.$v.$reset()
+      this.username = ''
+      this.password = ''
+    },
+  },
+}
 </script>

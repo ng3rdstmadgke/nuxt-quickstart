@@ -1,5 +1,6 @@
 <template>
 <div>
+  <Alert ref="alert" type="error" :message="$data.alertMessage"></Alert>
   <v-simple-table>
     <template v-slot:default>
       <thead>
@@ -11,19 +12,19 @@
       <tbody>
         <tr>
           <td>id</td>
-          <td>{{ $data.response.user.id }}</td>
+          <td>{{ $data.user.id }}</td>
         </tr>
         <tr>
           <td>username</td>
-          <td>{{ $data.response.user.username }}</td>
+          <td>{{ $data.user.username }}</td>
         </tr>
         <tr>
           <td>is_active</td>
-          <td>{{ $data.response.user.is_active }}</td>
+          <td>{{ $data.user.is_active }}</td>
         </tr>
         <tr>
           <td>is_superuser</td>
-          <td>{{ $data.response.user.is_superuser }}</td>
+          <td>{{ $data.user.is_superuser }}</td>
         </tr>
       </tbody>
     </template>
@@ -63,43 +64,56 @@
 
 <script>
 import ConfirmDialog from '~/components/ConfirmDialog'
+import Alert from '~/components/Alert'
+import Common from '@/plugins/common'
 
 export default {
+  middleware: ['auth'], // middleware/auth.js
+
   data() {
     return {
-      dialogMessage: "本当に削除しますか"
-      
+      dialogMessage: "本当に削除しますか",
+      alertMessage: "",
     }
   },
+
   components: {
-    ConfirmDialog: ConfirmDialog
+    ConfirmDialog: ConfirmDialog,
+    Alert: Alert,
   },
+
   methods: {
+    // アイテム削除時のダイアログ表示
     openDeleteConfirmDialog(id) {
       // ConfirmDialogタグのref属性のconfirmを指定している
       // https://zenn.dev/kokota/articles/247d4f61590dab
-      // ConfirmDialogコンポーネントのopen()を呼び出すことでdialogを表示する
+      // ConfirmDialogコンポーネントのopen()を呼びu出すことでdialogを表示する
       this.$refs.confirm.open()
     },
     async confirmDeletion() {
-      await this.$store.dispatch("users/deleteUser", this.$route.params.userId);
-      this.$router.push({path: "/users"})
+      this.$axios.delete(`http://127.0.0.1:8000/api/v1/users/${this.$route.params.userId}`)
+        .then(_res => {
+          this.$router.push({path: "/users"})
+        })
+        .catch(e => {
+          this.$data.alertMessage = Common.getAlertMessage(e)
+          this.$refs.alert.open()
+        })
     }
   },
+
+  // サーバーサイドの処理
   async asyncData(context) {
     // contestのメンバ: https://nuxtjs.org/docs/internals-glossary/context/
     //                  https://develop365.gitlab.io/nuxtjs-2.8.X-doc/ja/api/context/
-    // TODO: ユーザー取得エラー時の処理
-    let response = await context.$axios.get(`http://127.0.0.1:8000/api/v1/open/users/${context.params.userId}`)
-      .then((res) => {
-        if (res.status == 200) {
-          console.log(res.data)
-          return {user: res.data}
-        } else {
-          return {}
-        }
+    //   contextからaxiosを利用する場合は context.$axios.get(...)
+    return context.$axios.get(`http://127.0.0.1:8000/api/v1/users/${context.params.userId}`)
+      .then(res => {
+        return {user: res.data}
       })
-      return {response: response}
+      .catch(e => {
+        Common.redirectErrorPage(context, e)
+      })
   },
 }
 </script>

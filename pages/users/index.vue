@@ -10,7 +10,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in $data.response.users" v-bind:key="user.id">
+        <tr v-for="user in $data.users" v-bind:key="user.id">
           <td>{{ user.id }}</td>
           <!-- 
             属性に変数を展開したい場合はv-bindを利用する
@@ -35,18 +35,21 @@
 </template>
 
 <script>
+import Common from '@/plugins/common'
 /**
  * プロパティ一覧
  * https://nuxtjs.org/docs/directory-structure/pages/#properties
  */
 export default {
+  middleware: ['auth'], // middleware/auth.js
+
   data() {
     return {
-      response: {}
     }
   },
   /**
    * dataに非同期なデータを保存するためのプロパティ
+   * サーバーサイドの処理
    * 
    * asyncDataは返却された値(オブジェクト)をコンポーネントのdataにマージされ、
    * asyncDataフックから返却されるpromiseはルートの繊維の間に解決される。
@@ -54,15 +57,13 @@ export default {
    * https://nuxtjs.org/ja/docs/features/data-fetching/#async-data
    */
   async asyncData(context) {
-    let response = await context.$axios.get("http://127.0.0.1:8000/api/v1/open/users/")
-      .then((res) => {
-        if (res.status == 200) {
-          return {users: res.data}
-        } else {
-          return {}
-        }
+    return context.$axios.get("http://127.0.0.1:8000/api/v1/users/")
+      .then(res => {
+        return {users: res.data}
       })
-    return {response: response}
+      .catch(e => {
+        Common.redirectErrorPage(context, e)
+      })
   },
 }
 </script>
